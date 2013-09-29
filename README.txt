@@ -3,6 +3,9 @@ TODO:
 
 1.  Make teleport points in and out of command block.  Takes care of entering
     problem.  (may be have it trans port all players in r=xx where name=XXX?)
+2.  Need to make a rail station for multiple sending.
+	Hopper coming out over command blocks that way a button in house
+	can trigger.
 
 The problem:
 ============
