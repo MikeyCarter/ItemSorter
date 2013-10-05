@@ -3,13 +3,14 @@ TODO:
 
 1.  Need overflow clock on the sending stations. (Rail house and selection house)
 2.  Replace world clock with pulse length extender?
-3.  Sub-Station hoppers facing wrong way.
-4.  Put hoppers in front of out going chest so people can throw things to the floor.
-5.  Dropper uphill design flawed.  (leaves items in the droppers) -- Needed a comparator at the top (piston signal down)
-6.  Hoppers into Station causes blocks arriving message to repeat for each item (item gap because of tower)
-7.  First block has dirt and marked as open.  Not good!
-8.  Add command block custom name to sub-station.
-9.  Need Light to say station is selected!
+3.  Hoppers into Station causes blocks arriving message to repeat for each item (item gap because of tower)
+4.  Add command block custom name to sub-station.
+5.  Need Light to say station is selected!
+6.  Additional Stations
+	- Castle Style.  (10 x 10 x 10 x 10 buttons with selection and minecart in centre)
+	- Sand Castle/Temple?
+7.  In Sample world add Check Points (activator and full/empty sensor)
+8.  Villagers still got back in the circuit area.
 
 The problem:
 ============
