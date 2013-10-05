@@ -1,17 +1,22 @@
 TODO:
 =====
 
-1.  Make teleport points in and out of command block.  Takes care of entering
-    problem.  (may be have it trans port all players in r=xx where name=XXX?)
-2.  Need to make a rail station for multiple sending.
-	Hopper coming out over command blocks that way a button in house
-	can trigger.
+1.  Need overflow clock on the sending stations. (Rail house and selection house)
+2.  Replace world clock with pulse length extender?
+3.  Sub-Station hoppers facing wrong way.
+4.  Put hoppers in front of out going chest so people can throw things to the floor.
+5.  Dropper uphill design flawed.  (leaves items in the droppers) -- Needed a comparator at the top (piston signal down)
+6.  Hoppers into Station causes blocks arriving message to repeat for each item (item gap because of tower)
+7.  First block has dirt and marked as open.  Not good!
+8.  Add command block custom name to sub-station.
+9.  Need Light to say station is selected!
 
 The problem:
 ============
 
 When mining or farming you can build up a pile of items.  But you don't want to
 spend a lot of time walking back to your house to sort them into chests.
+
 The other problem is with all your sorted chests you don't want to have to walk
 back to the house to pick up those items you need for building in a remote area.
 
@@ -25,20 +30,17 @@ sorts them into bins.  Then using command blocks you can remotely select items
 you want and it will dispense them to you.
 
 Notes:
- - Originally I tried using a really compact sorter.  But then they selection
+ - Originally I tried using a really compact sorter.  But then the selection
    part became a problem with cross talk.  Not to mention some items like wool
    would cause sorters beside to activate and empty their contents.
  - It's surrounded by bedrock so it can't be entered in adventure/survival mode
-   unless accompanied by administrator
- - It's design was intended to place under the bottom layer of bed rock using 
-   MCEdit.  That way it doesn't destroy the existing world too much.  You just
-   need to use mine carts to transport items around
+   unless by administrator.  * You may need to modify the TP command block
  - There should be enough light generated in the housing to stop MOB spawning,
    or so I hope.
  - The inside should be completely navigable in adventure/survival mode. You 
    might get lost though.
  - There is signs on each block/area explaining what it's doing.
- - There's a set of chests lining the back wall (file 010) for the items not 
+ - There's a set of chests lining the back wall (File BL) for the items not 
    covered by the sorting system.  You could redirect it as the final hopper is
    right at the bedrock wall.
    11 double chests.  54 slots per double chests.  594 slots total.  Then the
@@ -100,15 +102,54 @@ Example:
 +----+ +----+ +----+ +----+
 
 
-Setting up each module:
-=======================
+Manually setting up each module:
+================================
 
 Each module needs to be setup to accept items.  
 
-  - There will be left over dirt in the hoppers/chests.  Remove it.
   - Each module has 8 command blocks with a code item001.  This needs to be 
-    replaced with the item (like Glass, or Dirt)
-  - Hit button on initialize command block.
-  - Replace dirt items from selection hopper (place 18-1-1-1-1) with items to
+    replaced with the item tag (like Glass, or Dirt)
+  - Replace bedrock items from selection hopper (place 18-1-1-1-1) with items to
     be selected (might not be 18 for things like eggs)
+ 
+  * I used bedrock for any placeholder items since you wouldn't be sorting
+    bedrock.
+    
+Automatically setting up the modules:
+=====================================
+
+I've included a MCEdit filter script ItemSorter.py which creates a 10 x 20 sorter 
+If you wish to customize it, it should be pretty self explanatory.  Just modify
+the bunch of CentreBlock and CentreLeft entries.
+
+By default I have a role of 20 as "Open" for manually configuration on already 
+placed sorters.
+
+My suggestion is create this block in an empty world.  Then cut/paste as a file
+to the world you want.  That way you can move it around in the import selection
+process.
+
+Files:
+======
+
+├── LICENSE
+├── MCEdit-filters
+│   ├── ItemSorter.py             # Sample script to create 20 x 10 sorter
+│   └── ReplaceSorter.py          # Script to replace items in hopper
+├── MCEdit-schematics
+│   ├── ItemSorter-BL.schematic   # Modules Back Left
+│   ├── ItemSorter-BC.schematic   # Modules Back Centre
+│   ├── ItemSorter-BR.schematic   # Modules Back Right
+│   ├── ItemSorter-CL.schematic   # Modules Centre Left
+│   ├── ItemSorter-CC.schematic   # Modules Centre Centre
+│   ├── ItemSorter-CR.schematic   # Modules Centre Right
+│   ├── ItemSorter-FL.schematic   # Modules Front Left
+│   ├── ItemSorter-FC.schematic   # Modules Front Centre
+│   ├── ItemSorter-FR.schematic   # Modules Front Right
+│   ├── ItemSorter-Exploded.schematic  # Exploded version of the modules above
+│   ├── ItemSorter-SampleSorterTop.schematic  # Sample top for the 10 x 20 sorter
+│   ├── ItemSorter-SelectionHouse.schematic   # Sample Selection House 20 x 3 deep selection
+│   ├── ItemSorter-SelectionHouse-Small.schematic  # Sample of small Selection House 20 x 1 deep seleciton
+│   ├── ItemSorter-SubStation.schematic            # 10 house sub-station for sending items to selection house
+│   └── Sample-Sorter.schematic                    # Sample 10 x 20 sorter (with top sub-station
 
