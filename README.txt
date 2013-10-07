@@ -1,19 +1,3 @@
-TODO:
-=====
-
-1.  Need overflow clock on the sending stations. (Rail house and selection house)
-2.  Replace world clock with pulse length extender?
-3.  Hoppers into Station causes blocks arriving message to repeat for each item (item gap because of tower)
-4.  Add command block custom name to sub-station.
-5.  Need Light to say station is selected!
-6.  Additional Stations
-	- Castle Style.  (10 x 10 x 10 x 10 buttons with selection and minecart in centre)
-	- Sand Castle/Temple?
-7.  In Sample world add Check Points (activator and full/empty sensor)
-8.  Villagers still got back in the circuit area.
-
-
-
 The problem:
 ============
 
@@ -59,6 +43,27 @@ Block Legend:
    Red Clay...: Sorting System
    Grey Clay..: Hopper Clock (one at the beginning of each row to power 
                               selection system)
+
+Delivery System and the Chunk Loading Problem:
+==============================================
+
+Initially I designed the system to use minecarts to pickup/deliver the items.
+However, even though I've included the designs, I've abandoned all hope of using
+minecarts.  When chunks are unloaded minecarts freeze and wait for a player to
+enter the zone before resuming.   So if your sorting station is under the spawn
+blocks and your selection system is 1000 blocks away.   There's going to be a few
+100 unloaded chunks between you and the sorting/selection system.
+
+The way around this is to create chunk loaders, by using pistons, or hopper clocks
+between the corners to create a 5 by 5 loaded area around the carts.  500MB of ram
+later... it's just not worth it.
+
+Best way is to use hoppers and droppers.   Create a hopper and dropper tower from
+the selection house to the item sorter.  Hoppers will partly load the chunks as
+the items pass through them.  Solving the minecart problem.
+
+Ref: Minecraft Piston Creation #29: Self Loading Minecart Track
+     http://www.youtube.com/watch?v=wj2A1uzwj_4
 
 
 Some Assembly Required!
@@ -149,56 +154,34 @@ Files:
 │   ├── ItemSorter-FL.schematic   # Modules Front Left
 │   ├── ItemSorter-FC.schematic   # Modules Front Centre
 │   ├── ItemSorter-FR.schematic   # Modules Front Right
-│   ├── ItemSorter-Exploded.schematic  # Exploded version of the modules above
+│   ├── ItemSorter-Exploded.schematic         # Exploded version of the modules above
 │   ├── ItemSorter-SampleSorterTop.schematic  # Sample top for the 10 x 20 sorter
-│   ├── ItemSorter-SelectionHouse.schematic   # Sample Selection House 20 x 3 deep selection
-│   ├── ItemSorter-SelectionHouse-Small.schematic  # Sample of small Selection House 20 x 1 deep selection
-│   ├── ItemSorter-SubStation.schematic            # 10 house sub-station for sending items to selection house
-│   └── Sample-Sorter.schematic                    # Sample 10 x 20 sorter (with top sub-station
+│   ├── Sample-Sorter-Hopper.schematic        # Sample 10 x 20 sorter (with hopper sub-station) - Used in 
+│   ├── Sample-Sorter-Minecart.schematic      # Abandoned Minecart Design
+│   ├── SelectionHouse-Hopper-Lrg.schematic   # Sample Selection House 20 x 3 deep selection
+│   ├── SelectionHouse-Hopper-Sml.schematic   # Sample Selection House 20 x 1 deep selection
+│   ├── SelectionHouse-Minecart-Lrg.schematic # Abandoned Minecart Design
+│   ├── SelectionHouse-Minecart-Sml.schematic # Abandoned Minecart Design
+│   ├── SubStation-Hopper.schematic           # Hopper based Selection Sub-Station
+│   └── SubStation-Minecart.schematic         # Abandoned Minecart Design
+└── Worlds
+    ├── ItemSorter                            # Flat world with working system
+    ├── Sample ItemSorter Hopper              # Sample world with hopper system
+    └── Sample ItemSorter World               # Abandoned Minecart Design (should work but quarky)
 
 
-Chunk Loading!
-==============
 
-Known Facts:
- - 
+TODO:
+=====
 
-After I got this designed and working, I tried moving it on to a real world.   
-Here I ran into a chunk loading problem.   The long and short of it...
-
-Blocks are only working (loaded) around the spawn area and around the player.
-So if the sorting house is in the spawn area it should always work... if not
-you may need to setup hopper chunk loaders to keep the sorter active.
-
-The bigger problem is minecarts on long distances.  Redstone you can keep active
-with either pistons on the chunk boarders or hopper clocks.  But minecarts won't
-work unless the block is fully active.
-
-To make a chunk fully active for MOBs you need to partly activate 2 chunk radius
-around the block the mine cart is in.
-
-Ref: Minecraft Piston Creation #29: Self Loading Minecart Track
-     http://www.youtube.com/watch?v=wj2A1uzwj_4
-
-Setting up Hopper Chunk Loaders:
---------------------------------
-
-The entire minecraft world are setup in chunks.  To have chunks stay active you
-need to place two hoppers pointing to each other right on the border of the 
-chuncks.
-
-So hit F3... see the C number beside your X/Y/Z co-ordinates.   Place hoppers
-between 15 and 0, passing a single item back and forth.  That will keep the 
-area active for redstone/hoppers.
-
-
-Commands:
-
-/scoreboard objectives remove Station
-/scoreboard objectives add Station dummy
-/scoreboard players set @a Station 0
-
-
-/say Items arriving at SmallsVille Station
-
+1.  Need overflow clock on the sending stations. (Rail house and selection house)
+2.  Replace world clock with pulse length extender?
+3.  Hoppers into Station causes blocks arriving message to repeat for each item (item gap because of tower)
+4.  Add command block custom name to sub-station.
+5.  Need Light to say station is selected!
+6.  Additional Stations
+	- Castle Style.  (10 x 10 x 10 x 10 buttons with selection and minecart in centre)
+	- Sand Castle/Temple?
+7.  In Sample world add Check Points (activator and full/empty sensor)
+8.  Villagers still got back in the circuit area.
 

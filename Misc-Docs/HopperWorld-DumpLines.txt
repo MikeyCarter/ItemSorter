@@ -1,0 +1,14 @@
+Quick diagram so I can hook up additional stations to the existing hopper lines.
+
+
+
+(-108,16,287)            (-108,16,360)
+             +-----------+-----------+ (-108, 16, 613)
+       Sorter            |           |
+                         |           |
+                         |           |
+                         |           |
+                         |           + (-176, 16, 613)  (desert)
+                         |
+                         + (-215,16,360)
+                           mid drop off
