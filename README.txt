@@ -12,6 +12,8 @@ TODO:
 7.  In Sample world add Check Points (activator and full/empty sensor)
 8.  Villagers still got back in the circuit area.
 
+
+
 The problem:
 ============
 
@@ -150,7 +152,53 @@ Files:
 │   ├── ItemSorter-Exploded.schematic  # Exploded version of the modules above
 │   ├── ItemSorter-SampleSorterTop.schematic  # Sample top for the 10 x 20 sorter
 │   ├── ItemSorter-SelectionHouse.schematic   # Sample Selection House 20 x 3 deep selection
-│   ├── ItemSorter-SelectionHouse-Small.schematic  # Sample of small Selection House 20 x 1 deep seleciton
+│   ├── ItemSorter-SelectionHouse-Small.schematic  # Sample of small Selection House 20 x 1 deep selection
 │   ├── ItemSorter-SubStation.schematic            # 10 house sub-station for sending items to selection house
 │   └── Sample-Sorter.schematic                    # Sample 10 x 20 sorter (with top sub-station
+
+
+Chunk Loading!
+==============
+
+Known Facts:
+ - 
+
+After I got this designed and working, I tried moving it on to a real world.   
+Here I ran into a chunk loading problem.   The long and short of it...
+
+Blocks are only working (loaded) around the spawn area and around the player.
+So if the sorting house is in the spawn area it should always work... if not
+you may need to setup hopper chunk loaders to keep the sorter active.
+
+The bigger problem is minecarts on long distances.  Redstone you can keep active
+with either pistons on the chunk boarders or hopper clocks.  But minecarts won't
+work unless the block is fully active.
+
+To make a chunk fully active for MOBs you need to partly activate 2 chunk radius
+around the block the mine cart is in.
+
+Ref: Minecraft Piston Creation #29: Self Loading Minecart Track
+     http://www.youtube.com/watch?v=wj2A1uzwj_4
+
+Setting up Hopper Chunk Loaders:
+--------------------------------
+
+The entire minecraft world are setup in chunks.  To have chunks stay active you
+need to place two hoppers pointing to each other right on the border of the 
+chuncks.
+
+So hit F3... see the C number beside your X/Y/Z co-ordinates.   Place hoppers
+between 15 and 0, passing a single item back and forth.  That will keep the 
+area active for redstone/hoppers.
+
+
+Commands:
+
+/scoreboard objectives remove Station
+/scoreboard objectives add Station dummy
+/scoreboard players set @a Station 0
+
+
+/say Items arriving at SmallsVille Station
+
 
