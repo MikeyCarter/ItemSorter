@@ -17,6 +17,15 @@ sorts them into bins.  Then using command blocks you can remotely select items
 you want and it will dispense them to you.
 
 Notes:
+ - CHUNK LOADERS (See below)! For the drop off system just putting an item will 
+   act as a chunk loader.  Also the hopper clocks should keep the sorter up and
+   running.  However, do your self a favour.  Place the sorter in the spawn 
+   chunks or move the spawn over top of it.
+ - NO DOORS!  The selection house control rooms have no doors.  After their 
+   programmed you shouldn't need to go in there.  But the reason for no doors is
+   villagers.   I had villagers in the area and they seem to love to run in there
+   and never leave.  Just break the wall or the glass on top to get in.  Then
+   replace the blocks.
  - Originally I tried using a really compact sorter.  But then the selection
    part became a problem with cross talk.  Not to mention some items like wool
    would cause sorters beside to activate and empty their contents.
@@ -27,6 +36,9 @@ Notes:
  - The inside should be completely navigable in adventure/survival mode. You 
    might get lost though.
  - There is signs on each block/area explaining what it's doing.
+ - Try to use it for raw items!  If you try to have a spot for every item in 
+   minecraft the system will be huge.  Try to stick to rare, or raw items.
+   If you need sticks, you can always request the wood and make it.
  - There's a set of chests lining the back wall (File BL) for the items not 
    covered by the sorting system.  You could redirect it as the final hopper is
    right at the bedrock wall.
@@ -169,6 +181,28 @@ Files:
     ├── Sample ItemSorter Hopper              # Sample world with hopper system
     └── Sample ItemSorter World               # Abandoned Minecart Design (should work but quarky)
 
+Troubleshooting:
+================
+
+ - Bunch of items are not counting when I push a button.
+ 	- Verify the names are correct.  The button score and the item sorter 
+ 	  need to match exact.
+ 	- Check the hopper clocks.  There's a hopper clock for each row in 
+ 	  the sorter.  Sometimes on cut/paste the hopper clock get's more than
+ 	  one item in it.  Thus stopping the clock and the selection system
+        - No items in the item sorter.  The score should be removed if 
+          the chests becomes empty.   Stopping the selection system.
+  - Items don't arrive
+        - check you or I haven't run the hopper line over a lit red stone torch.        
+          I've done this several times.
+  - Get some items from the current and previous selection.
+  	- check for lag on the hopper towers.  I should have set the repeaters
+  	  to 4 ticks but it may not be enough in some situations.
+  	- check I/you didn't run the hopper lines over one of the dropper tower 
+  	  torches!  I've done this twice already!
+   - I don't get 20 items like select.  I only get 19.
+   	- It happens sometimes.  My theory, hoppers drop items at ~2.5/s.  It's 
+   	  that approximate part that can give you one less item.
 
 
 TODO:
@@ -180,8 +214,22 @@ TODO:
 4.  Add command block custom name to sub-station.
 5.  Need Light to say station is selected!
 6.  Additional Stations
-	- Castle Style.  (10 x 10 x 10 x 10 buttons with selection and minecart in centre)
+	- Castle Style.  (10 x 10 x 10 x 10, 2 levels high, with crafting centre/court yard?
 	- Sand Castle/Temple?
 7.  In Sample world add Check Points (activator and full/empty sensor)
 8.  Villagers still got back in the circuit area.
+9.  Need a rewards module.  If play dumps in items it counts and give L report?
+	- How to sense item is of value?
 
+
+Frequent Cut/Pasted commands:
+=============================
+
+Station Selection:
+/scoreboard objectives remove Station
+/scoreboard objectives add Station dummy
+/scoreboard players set @a Station 0
+/scoreboard objectives setdisplay sidebar Station
+
+Item Selection:
+/scoreboard players set @p CyanWool 20
