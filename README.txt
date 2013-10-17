@@ -221,6 +221,9 @@ TODO:
 9.  Need a rewards module.  If play dumps in items it counts and give L report?
 	- How to sense item is of value?
 
+10.  Pulse to bunch up items before sub-station flawed!  when full it stops sending items.
+       Needs a logic gate there somewhere.  When both per-hoppers have item... send items.
+
 
 Frequent Cut/Pasted commands:
 =============================
