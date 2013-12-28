@@ -34,6 +34,504 @@ class ErrorWithCode(Exception):
 
 
 ################################################################################
+# Program Bank Counting System V2
+################################################################################
+#START-BLOCK-COUNTER
+#/scoreboard players add @r stone 21
+#/scoreboard players add @r stone 21
+#/scoreboard players add @r stone 21
+#/setblock ~ ~ ~3 minecraft:lava 0 replace
+#/setblock ~ ~ ~5 minecraft:hopper 0 destroy {Items:[{id:1,Count:1,Damage:0,Slot:0},{id:408,Count:1,Damage:2,Slot:1},{id:408,Count:1,Damage:2,Slot:2},{id:408,Count:1,Damage:2,Slot:3},{id:408,Count:1,Damage:2,Slot:4}]}
+#/scoreboard objectives setdisplay sidebar stone
+def setBankV2(start, t, x_offset, z_offset, score, itemID, itemSubID, count, total):
+   setItemsTo=int(total-count);
+
+   if (setItemsTo < 1):
+     print "Too many items! ("+str(score)+" - "+str(setItemsTo)+")"
+     sys.exit(2)
+
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset) and t["y"].value == (start["y"].value + 1) and t["id"].value == "Hopper":
+       if "Items" in t:
+         for item in t["Items"]:
+             if item["Slot"].value == 0:
+               item["id"] = TAG_Short(itemID)
+               item["Damage"] = TAG_Short(itemSubID)
+               item["Count"] = TAG_Short(setItemsTo)
+             else:
+               item["id"] = TAG_Short(408)
+               item["Damage"] = TAG_Short(2)
+               item["Count"] = TAG_Short(1)
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset+1) and t["y"].value == (start["y"].value + 3) and (t["id"].value == "Sign"):
+       t["Text1"] = TAG_String(str(score))
+       t["Text2"] = TAG_String(str(itemID))
+       t["Text3"] = TAG_String(str(itemSubID))
+       #print "R: "+t["id"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset) and t["y"].value == (start["y"].value + 3) and t["id"].value == "Control":
+       t["Command"] = TAG_String("/scoreboard players add @r "+str(score)+" "+str(int(count/3)))
+       #print "R: "+t["id"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset-1) and t["y"].value == (start["y"].value + 2) and t["id"].value == "Control":
+       t["Command"] = TAG_String("/scoreboard players add @r "+str(score)+" "+str(int(count/3)))
+       #print "R: "+t["id"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset-2) and t["y"].value == (start["y"].value + 2) and t["id"].value == "Control":
+       t["Command"] = TAG_String("/scoreboard players add @r "+str(score)+" "+str(int(count/3)))
+       #print "R: "+t["id"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset-3) and t["y"].value == (start["y"].value + 1) and t["id"].value == "Control":
+       t["Command"] = TAG_String("/setblock ~ ~ ~3 minecraft:lava 0 replace")
+       #print "R: "+t["id"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset-5) and t["y"].value == (start["y"].value + 1) and t["id"].value == "Control":
+       t["Command"] = TAG_String("/setblock ~ ~ ~5 minecraft:hopper 0 destroy {Items:[{id:"+str(itemID)+",Count:"+str(setItemsTo)+",Damage:"+str(itemSubID)+",Slot:0},{id:408,Count:1,Damage:2,Slot:1},{id:408,Count:1,Damage:2,Slot:2},{id:408,Count:1,Damage:2,Slot:3},{id:408,Count:1,Damage:2,Slot:4}]}")
+       #print "R: "+t["id"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+
+   if t["x"].value == (start["x"].value+x_offset) and t["z"].value == (start["z"].value-z_offset-6) and t["y"].value == (start["y"].value + 1) and t["id"].value == "Control":
+       t["Command"] = TAG_String("/scoreboard objectives setdisplay sidebar "+str(score))
+       print "R: "+t["id"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+       print "/scoreboard objectives add "+str(score)+" dummy"
+
+   x_offset=x_offset+3
+   if (x_offset > 49):
+     z_offset=z_offset+10
+     x_offset=2
+
+   return (x_offset,z_offset)
+
+count=0
+item_common=63
+item_rare=18
+item_veryrare=3
+item_single=3
+item_16=15
+
+# Locate Start Block(s)
+for (xPos, zPos) in chunkPositions:
+    chunk = world1.getChunk(xPos, zPos)
+    for st in chunk.TileEntities:
+      if st["id"].value == "Control" and st["Command"].value == "START-BLOCK-COUNTER":
+          count=count+1
+          start = st
+          Start_xPos = xPos
+          Start_zPos = zPos
+          print "Detected start block at: " + str(xPos) + " " + str(zPos) +" : x="+str(start["x"].value)+",y="+str(start["y"].value)+",z="+str(start["z"].value)
+
+          for (xPos, zPos) in chunkPositions:
+            if xPos >= Start_xPos and zPos <= Start_zPos and xPos < (Start_xPos +4) and zPos > (Start_zPos -12):
+              chunk = world1.getChunk(xPos, zPos)
+              chunk.chunkChanged();
+              for t in chunk.TileEntities:
+                if t["id"].value == "Control" or t["id"].value == "Hopper" or t["id"].value == "Sign":
+                  if t["y"].value >= start["y"].value and t["y"].value <= (start["y"].value+3) and t["x"].value >= start["x"].value and t["x"].value <= (start["x"].value+51) and t["z"].value <= start["z"].value and t["z"].value >= (start["z"].value-181):
+                     t["CustomName"] = TAG_String("Counter-v2")
+                     #Z Limits: 307-127
+
+                     # Row - 1
+                     x_offset=2
+                     z_offset=2
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "grass",           "2",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "dirt",            "3",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "podzol",          "3",   "2", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cobblestone",     "4",   "0", item_common, 64)  
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "planks_oak",      "5",   "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "planks_spruce",   "5",   "1", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "planks_birch",    "5",   "2", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "planks_jungle",   "5",   "3", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "planks_acacia",   "5",   "4", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "planks_dark_oak", "5",   "5", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sapling_oak",     "6",   "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sapling_spruce",  "6",   "1", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sapling_birch",   "6",   "2", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sapling_jungle",  "6",   "3", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sapling_acacia",  "6",   "4", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sapling_d_oak",   "6",   "5", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sand",            "12",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "red_sand",        "12",  "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gravel",          "13",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gold_ore",        "14",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "iron_ore",        "15",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "coal_ore",        "16",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "oak",             "17",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "spruce",          "17",  "1", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "birch",           "17",  "2", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "jungle",          "17",  "3", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass",           "20",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "lapis_ore",       "21",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "lapis_block",     "22",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "dispenser",       "23",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sandstone",       "24",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "c_sandstone",     "24",  "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "s_sandstone",     "24",  "2", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "powered_rail",    "27",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "detector_rail",   "28",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sticky_piston",   "29",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "piston",          "33",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_white",      "35",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_orange",     "35",  "1", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_magenta",    "35",  "2", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_lblue",      "35",  "3", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_yellow",     "35",  "4", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_lime",       "35",  "5", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_pink",       "35",  "6", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_gray",       "35",  "7", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_lgray",      "35",  "8", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_cyan",       "35",  "9", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_purple",     "35",  "10", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_blue",       "35",  "11", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_brown",      "35",  "12", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_green",      "35",  "13", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_red",        "35",  "14", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wool_black",      "35",  "15", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "dandelion",       "37",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "poppy",           "38",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "blue_orchid",     "38",  "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "allium",          "38",  "2", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "azure_bluet",     "38",  "3", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "red_tulip",       "38",  "4", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "orange_tulip",    "38",  "5", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "white_tulip",     "38",  "6", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pink_tulip",      "38",  "7", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "oxeye_daisy",     "38",  "8", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "brown_mushroom",  "39",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "red_mushroom",    "40",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gold_block",      "41",  "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "iron_block",      "42",  "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone_slab",      "44",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "brick_block",     "45",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "TNT",             "46", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "bookshelf",       "47",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "mos_cobblestone", "48",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "obsidian",        "49",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "torch",           "50",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "chest",           "54",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "diamond_ore",     "56",  "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "diamond_block",   "57",  "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "craft_table",     "58",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "furnace",         "61",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "rail",            "66",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "ladder",          "65",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "lever",           "69",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pressure_stone",  "70",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pressure_wood",   "72",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "redstone_ore",    "73",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "redstone_torch",  "76", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "button_stone",    "77",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "ice",             "79",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "snow",            "80",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cactus",          "81",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay",            "82",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "fence",           "85",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pumpkin",         "86", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "netherrack",      "87",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "soul_sand",       "88",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glowstone",       "89",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "lit_pumpkin",     "91", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_white",     "95",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_orange",    "95",  "1", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_magenta",   "95",  "2", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_lblue",     "95",  "3", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_yellow",    "95",  "4", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_lime",      "95",  "5", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_pink",      "95",  "6", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_gray",      "95",  "7", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_lgray",     "95",  "8", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_cyan",      "95",  "9", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_purple",    "95",  "10", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_blue",      "95",  "11", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_brown",     "95",  "12", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_green",     "95",  "13", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_red",       "95",  "14", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_black",     "95",  "15", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "trapdoor",        "96",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stonebrick",      "98",  "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "b_mushroom_blk",  "99",  "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "r_mushroom_blk",  "100", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "iron_bars",       "101", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_pane",      "102", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "melon_block",     "103", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "vines",           "106", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "fence_gate",      "107", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "mycelium",        "110", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "waterlily",       "111", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "nether_brick",    "112", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "nether_fence",    "113", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "nether_stairs",   "114", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "redstone_lamp",   "123", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "emerald_ore",     "129", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "tripwire_hook",   "131", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "emerald_block",   "133", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cobblestone_w",   "139", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "button_wood",     "143", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "trapped_chest",   "146", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pressure_gold",   "147", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pressure_iron",   "148", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "redstone_block",  "152", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "quartz_ore",      "153", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "hopper",          "154", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "quartz_block",    "155", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "quartz_stairs",   "156", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "activator_rail",  "157", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "dropper",         "158", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_white",      "159", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_orange",     "159", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_magenta",    "159", "2", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_lblue",      "159", "3", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_yellow",     "159", "4", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_lime",       "159", "5", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_pink",       "159", "6", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_gray",       "159", "7", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_lgray",      "159", "8", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_cyan",       "159", "9", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_purple",     "159", "10", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_blue",       "159", "11", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_brown",      "159", "12", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_green",      "159", "13", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_red",        "159", "14", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_black",      "159", "15", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_white",   "160", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_orange",  "160", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_magenta", "160", "2", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_lblue",   "160", "3", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_yellow",  "160", "4", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_lime",    "160", "5", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_pink",    "160", "6", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_gray",    "160", "7", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_lgray",   "160", "8", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_cyan",    "160", "9", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_purple",  "160", "10", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_blue",    "160", "11", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_brown",   "160", "12", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_green",   "160", "13", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_red",     "160", "14", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_p_black",   "160", "15", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "acacia",          "162", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "dark_oak",        "162", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "hay_bale",        "170", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "hard_clay",       "172", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "coal_block",      "173", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sunflower",       "175", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "lilac",           "175", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "fern",            "175", "2", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "rose",            "175", "4", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "peony",           "175", "5", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "apple",           "260", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "arrow",           "262", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "coal",            "263", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "charcoal",        "263", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "diamond",         "264", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "iron_ingot",      "265", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gold_ingot",      "266", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stick",           "280", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "string",          "287", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "feather",         "288", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gunpowder",       "289", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wheat",           "296", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "seed",            "295", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "flint",           "318", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "raw_pork",        "319", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cook_pork",       "320", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "painting",        "321", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gold_apple",      "322", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "e_gold_apple",    "322", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sign",            "323", "0", item_16, 16)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "bucket",          "325", "0", item_16, 16)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "redstone",        "331", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "snowball",        "332", "0", item_16, 16)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "leather",         "334", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "brick",           "336", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clay_ball",       "337", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sugar_cane",      "338", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "paper",           "339", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "slimeball",       "341", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "egg",             "344", "0", item_16, 16)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glowstone_dust",  "348", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "raw_fish",        "349", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "raw_salmon",      "349", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "clownfish",       "349", "2", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pufferfish",      "349", "3", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cook_fish",       "350", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cook_salmon",     "350", "1", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "ink_sack",        "351", "1", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cocoa",           "351", "3", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "bonemeal",        "351", "15", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "bone",            "352", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "sugar",           "353", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "repeater",        "356", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "melon",           "360", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pumpkin_seed",    "361", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "melon_seed",      "362", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "raw_beef",        "363", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "steak",           "364", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "raw_chicken",     "365", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "cook_chicken",    "366", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "rotten_flesh",    "367", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "ender_pearl",     "368", "0", item_single,16)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "blaze_rod",       "369", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "ghast_tear",      "370", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gold_nuget",      "371", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "nether_wart",     "372", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "glass_bottle",    "374", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "spider_eye",      "375", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "blaze_powder",    "377", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "magma_cream",     "378", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "eye_of_ender",    "381", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "emerald",         "388", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "item_frame",      "389", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "carrot",          "391", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "potato",          "392", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "baked_potato",    "393", "0", item_common, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "pos_potato",      "394", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "gold_carrot",     "396", "0", item_veryrare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "comparator",      "404", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "nether_brick",    "405", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "nether_quartz",   "406", "0", item_rare, 64)
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "lead",            "420", "0", item_rare, 64)
+
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "stone",           "1",   "0", item_common, 64)   
+
+#                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "wood_door",       "324", "0", item_single,1)
+#                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "bucket_water",    "326", "0", item_single,1)
+#                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "bucket_lava",     "327", "0", item_single,1)
+#                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "iron_door",       "330", "0", item_single,1)
+#                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "minecart",        "328", "0", item_single, 1)
+#                     (x_offset,z_offset)=setBankV2(start, t, x_offset, z_offset, "bucket_milk",     "335", "0", item_single, 1)
+                    
+                     
+                     if t["id"].value == "Control":
+                       print "C2: "+t["CustomName"].value + ": " + str(t["x"].value) + "," + str(t["y"].value) + "," + str(t["z"].value) + "  - " + t["Command"].value
+                   
+world1.saveInPlace();
+sys.exit(1)
+
+
+################################################################################
 # Program Acquisition System
 ################################################################################
 
@@ -1484,14 +1982,9 @@ for (xPos, zPos) in chunkPositions:
 
 world1.saveInPlace();
 
-
-#sys.exit(1)
-
 #/scoreboard players remove @p grass 20
 #/summon Item ~ ~5 ~ {Item:{id:2,Count:20}}
 #/testfor @p[score_grass_min=20,r=6]
-
-
 
 ################################################################################
 # Program Bank Counting System
@@ -1773,3 +2266,7 @@ world1.saveInPlace();
 # /testforblock ~-5 ~ ~1 dropper 1 {Items:[0:{Slot:0b,id:1s,Damage:0s,Count:1b}]}
 # /scoreboard objectives add grass dummy
 # /scoreboard players add @r grass 1
+
+
+
+
